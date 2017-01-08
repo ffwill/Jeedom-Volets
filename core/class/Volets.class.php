@@ -176,12 +176,22 @@ class Volets extends eqLogic {
 					$AngleMin=$AngleDrtCnt;
 					$AngleMax=$AngleCntGau;
 				}
-				log::add('Volets','debug','La fenêtre d\'ensoleillement '.$this->getHumanName().' est comprisent entre : '.$AngleMin.'° et '.$AngleMax.'°');
+				log::add('Volets','debug','La fenêtre d\'ensoleillement '.$this->getHumanName().' est comprisent entre : '.$AngleDrtCnt.'° et '.$AngleCntGau.'°');
 				$Action=$this->getConfiguration('action');
 				$result=$this->EvaluateCondition();
 				if($result){
 					log::add('Volets','debug','Les conditions sont remplie');
-					if($Azimuth<$AngleMax&&$Azimuth>$AngleMin){
+					$inWindow = false; 
+					if($AngleCntGau < $AngleDrtCnt) //angle orienté dans le bon sens: on fait une evaluation directe: azimute e [ AngleCntGau ; AngleDrtCnt] 
+					{
+						$inWindow = $AngleDrtCnt < $Azimuth && $Azimuth < $AngleCntGau;
+					}
+                                        else//on fait une evaludation indirecte: azimute e [ 0 ; AngleCntGau] U [ AngleDrtCnt; 360]
+					{
+                       				$inWindow  =  $Azimuth < $AngleDrtCnt || $AngleDrtCnt > $AngleCntGau;
+					}					
+					//if($Azimuth<$AngleMax&&$Azimuth>$AngleMin){
+                                        if($inWindow){
 						log::add('Volets','debug','Le soleil est dans la fenetre');
 						$Action=$Action['close'];
 						$Status='close';
