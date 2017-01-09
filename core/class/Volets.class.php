@@ -182,19 +182,19 @@ class Volets extends eqLogic {
 				if($result){
 					log::add('Volets','debug','Les conditions sont remplie');
 					$inWindow = false; 
-					if($AngleCntGau < $AngleDrtCnt) //angle orienté dans le bon sens: on fait une evaluation directe: azimute e [ AngleCntGau ; AngleDrtCnt] 
+					if($AngleDrtCnt < $AngleCntGau) //angle orienté: /!\ droit et gauche inversé, sans overflow: on fait une evaluation directe: azimute E [ AngleDrtCnt ; AngleCntGau] 
 					{
 						$inWindow = $AngleDrtCnt < $Azimuth && $Azimuth < $AngleCntGau;
 					}
-                                        else//on fait une evaludation indirecte: azimute e [ 0 ; AngleCntGau] U [ AngleDrtCnt; 360]
+                                        else// azimute E [ 0 ; AngleCntGau] U [ AngleDrtCnt; 360]
 					{
-                       				$inWindow  =  $Azimuth < $AngleDrtCnt || $AngleDrtCnt > $AngleCntGau;
+                       				$inWindow  =  $Azimuth < $AngleCntGau || $AngleDrtCnt < $Azimuth;
 					}					
 					//if($Azimuth<$AngleMax&&$Azimuth>$AngleMin){
                                         if($inWindow){
 						log::add('Volets','debug','Le soleil est dans la fenetre');
 						$Action=$Action['close'];
-						$Status='close';
+						$Status='close';	
 					}else{
 						log::add('Volets','debug','Le soleil n\'est pas dans la fenetre');
 						$Action=$Action['open'];
