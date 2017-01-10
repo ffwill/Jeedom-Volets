@@ -153,7 +153,7 @@ class Volets extends eqLogic {
 		return false;
 	}		
 	public function ActionAzimute($Azimuth) {
-		if(true || $this->checkJour()){
+		if($this->checkJour()){
 			log::add('Volets', 'debug', 'Execution de '.$this->getHumanName());
 			$Droite=$this->getConfiguration('Droite');
 			$Gauche=$this->getConfiguration('Gauche');
@@ -186,7 +186,7 @@ class Volets extends eqLogic {
                                         if($inWindow){
 						log::add('Volets','debug','Le soleil est dans la fenetre');
 						$Action=$Action['close'];
-						$Status='close';	
+						$Status='close';
 					}else{
 						log::add('Volets','debug','Le soleil n\'est pas dans la fenetre');
 						$Action=$Action['open'];
@@ -200,7 +200,7 @@ class Volets extends eqLogic {
 				}
 			}
 		}else
-			log::add('Volets','debug','getAndit nuit, la gestion par azimuth est désactivé');
+			log::add('Volets','debug','Il fait nuit, la gestion par azimuth est désactivé');
 	}
 	public function ExecuteAction($Action) {	
 		foreach($Action as $cmd){
