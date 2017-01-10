@@ -153,7 +153,7 @@ class Volets extends eqLogic {
 		return false;
 	}		
 	public function ActionAzimute($Azimuth) {
-		if($this->checkJour()){
+		if(true || $this->checkJour()){
 			log::add('Volets', 'debug', 'Execution de '.$this->getHumanName());
 			$Droite=$this->getConfiguration('Droite');
 			$Gauche=$this->getConfiguration('Gauche');
@@ -169,28 +169,20 @@ class Volets extends eqLogic {
 					$Centre['lng'],
 					$Gauche['lat'],
 					$Gauche['lng']);
-				if ($AngleDrtCnt > $AngleCntGau){
-					$AngleMin=$AngleCntGau;
-					$AngleMax=$AngleDrtCnt;
-				}else{
-					$AngleMin=$AngleDrtCnt;
-					$AngleMax=$AngleCntGau;
-				}
-				log::add('Volets','debug','La fenêtre d\'ensoleillement '.$this->getHumanName().' est comprisent entre : '.$AngleDrtCnt.'° et '.$AngleCntGau.'°');
+				log::add('Volets','debug','La fenêtre d\'ensoleillement '.$this->getHumanName().' est comprisent entre : '.$AngleCntGau.'° et '.$AngleDrtCnt.'°');
 				$Action=$this->getConfiguration('action');
 				$result=$this->EvaluateCondition();
 				if($result){
 					log::add('Volets','debug','Les conditions sont remplie');
-					$inWindow = false; 
-					if($AngleDrtCnt < $AngleCntGau) //angle orienté: /!\ droit et gauche inversé, sans overflow: on fait une evaluation directe: azimute E [ AngleDrtCnt ; AngleCntGau] 
+					$inWindow = false;
+					if($AngleCntGau < $AngleDrtCnt) //angle orienté on fait une evaluation directe si l'angle passe pas par le nord (0->360°) : azimute E [ AngleCngGaut ; AngleDrtCnt] 
 					{
-						$inWindow = $AngleDrtCnt < $Azimuth && $Azimuth < $AngleCntGau;
+						$inWindow = $AngleCntGau < $Azimuth && $Azimuth < $AngleDrtCnt;
 					}
                                         else// azimute E [ 0 ; AngleCntGau] U [ AngleDrtCnt; 360]
 					{
                        				$inWindow  =  $Azimuth < $AngleCntGau || $AngleDrtCnt < $Azimuth;
 					}					
-					//if($Azimuth<$AngleMax&&$Azimuth>$AngleMin){
                                         if($inWindow){
 						log::add('Volets','debug','Le soleil est dans la fenetre');
 						$Action=$Action['close'];
@@ -208,12 +200,14 @@ class Volets extends eqLogic {
 				}
 			}
 		}else
-			log::add('Volets','debug','Il fait nuit, la gestion par azimuth est désactivé');
+			log::add('Volets','debug','getAndit nuit, la gestion par azimuth est désactivé');
 	}
 	public function ExecuteAction($Action) {	
 		foreach($Action as $cmd){
 			$Commande=cmd::byId(str_replace('#','',$cmd['cmd']));
 			if(is_object($Commande)){
+				if($this->getConfiguration('isRandom'))
+				   sleep(rand(0,10));
 				log::add('Volets','debug','Execution de '.$Commande->getHumanName());
 				$Commande->execute($cmd['options']);
 			}
@@ -224,7 +218,8 @@ class Volets extends eqLogic {
 			$Heure=substr($HeureStart,0,1);
 		else
 			$Heure=substr($HeureStart,0,2);
-		$Minute=substr($HeureStart,-2)+$this->getConfiguration($delais);
+		$Minute=floatval(substr($HeureStart,-2));
+		$Minute+=floatval($this->getConfiguration($delais));
 		while($Minute>=60){
 			$Minute-=60;
 			$Heure+=1;
@@ -274,7 +269,7 @@ class Volets extends eqLogic {
 		$longDelta = $longitudeDest - $longitudeOrigne;
 		$y = sin($longDelta) * cos($latitudeDest);
 		$x = cos($latitudeOrigine)*sin($latitudeDest) - sin($latitudeOrigine)*cos($latitudeDest)*cos($longDelta);
-		$angle = rad2deg(atan2($y, $x));
+		$angle = - rad2deg(atan2($y, $x));
 		while ($angle < 0) {
 			$angle += 360;
 		}
